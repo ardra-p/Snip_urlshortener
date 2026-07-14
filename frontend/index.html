@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Snip — URL Shortener</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="wrap">
+    <header class="header">
+      <div class="mark">Snip</div>
+      <p class="tagline">Turn long links into short ones. Paste, snip, share.</p>
+    </header>
+
+    <section class="panel">
+      <form id="shorten-form" class="form">
+        <input
+          type="url"
+          id="url-input"
+          class="url-input"
+          placeholder="https://example.com/a/very/long/path?query=here"
+          required
+        />
+        <button type="submit" class="btn" id="submit-btn">Snip it</button>
+      </form>
+
+      <p id="error-msg" class="error hidden"></p>
+
+      <div id="result" class="result hidden">
+        <span class="result-label">Your short link</span>
+        <div class="result-row">
+          <a id="result-link" class="result-link" href="#" target="_blank" rel="noopener"></a>
+          <button id="copy-btn" class="copy-btn">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="recent">
+      <div class="recent-head">
+        <span class="recent-title">Recent snips</span>
+        <span class="recent-count" id="recent-count"></span>
+      </div>
+      <ul id="recent-list" class="recent-list"></ul>
+    </section>
+
+    <footer class="footer">
+      <label class="api-label" for="api-base">Backend URL</label>
+      <input type="text" id="api-base" class="api-input" placeholder="http://127.0.0.1:8000" />
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
