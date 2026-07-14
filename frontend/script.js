@@ -1,7 +1,4 @@
-// --- Config: where your Django backend is hosted ---
-const DEFAULT_API_BASE = "http://127.0.0.1:8000";
-
-const apiBaseInput = document.getElementById("api-base");
+// Backend URL comes from config.js (loaded before this file)
 const form = document.getElementById("shorten-form");
 const urlInput = document.getElementById("url-input");
 const submitBtn = document.getElementById("submit-btn");
@@ -13,15 +10,8 @@ const recentList = document.getElementById("recent-list");
 const recentCount = document.getElementById("recent-count");
 
 function getApiBase() {
-  return (apiBaseInput.value || DEFAULT_API_BASE).replace(/\/$/, "");
+  return API_BASE.replace(/\/$/, "");
 }
-
-// Remember the backend URL the user typed in, across visits
-apiBaseInput.value = localStorage.getItem("snip_api_base") || DEFAULT_API_BASE;
-apiBaseInput.addEventListener("change", () => {
-  localStorage.setItem("snip_api_base", apiBaseInput.value);
-  loadRecent();
-});
 
 function showError(message) {
   errorMsg.textContent = message;
@@ -40,7 +30,7 @@ async function loadRecent() {
     const data = await res.json();
     renderRecent(data.results || []);
   } catch (err) {
-    recentList.innerHTML = `<li class="recent-empty">Can't reach the backend yet — check the URL below.</li>`;
+    recentList.innerHTML = `<li class="recent-empty">Can't reach the backend right now.</li>`;
     recentCount.textContent = "";
   }
 }
@@ -94,7 +84,7 @@ form.addEventListener("submit", async (e) => {
     urlInput.value = "";
     loadRecent();
   } catch (err) {
-    showError("Couldn't reach the backend. Check the backend URL below and that it's running.");
+    showError("Couldn't reach the backend. Make sure it's deployed and running.");
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = "Snip it";
@@ -107,7 +97,6 @@ copyBtn.addEventListener("click", async () => {
     copyBtn.textContent = "Copied!";
     setTimeout(() => (copyBtn.textContent = "Copy"), 1500);
   } catch (err) {
-    // Fallback for browsers without clipboard API permission
     const range = document.createRange();
     range.selectNode(resultLink);
     window.getSelection().removeAllRanges();
