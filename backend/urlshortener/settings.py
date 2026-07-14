@@ -1,21 +1,24 @@
-"""
-Django settings for the URL Shortener project.
-Simple, student-project-friendly configuration.
-"""
-
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep this secret in production! Use an environment variable.
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-change-this-in-production")
-
-# SECURITY WARNING: don't run with debug turned on in production!
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-key-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-# Add your hosting domain here after deployment, e.g. "your-app.onrender.com"
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if h.strip()
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 7
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -40,10 +43,11 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# CORS: allow the frontend (hosted separately) to call this API.
-# For a class project this is fine wide open; for real deployments, restrict it:
-# CORS_ALLOWED_ORIGINS = ["https://your-frontend-url.netlify.app"]
-CORS_ALLOW_ALL_ORIGINS = True
+_cors_origins = os.environ.get("DJANGO_CORS_ORIGINS", "")
+if _cors_origins:
+    CORS_ALLOWED_ORIGINS = [o.strip() for o in _cors_origins.split(",") if o.strip()]
+else:
+    CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 ROOT_URLCONF = "urlshortener.urls"
 
@@ -65,13 +69,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "urlshortener.wsgi.application"
 
-# Database
-# Uses SQLite by default (zero setup, perfect for hosting free tiers)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
